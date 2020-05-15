@@ -14,6 +14,9 @@ namespace Prometheus.SystemMetrics
 	{
 		private readonly IEnumerable<ISystemMetricCollector> _collectors;
 
+		/// <summary>
+		/// Creates a new <see cref="SystemMetricsHostedService"/>
+		/// </summary>
 		public SystemMetricsHostedService(IEnumerable<ISystemMetricCollector> collectors)
 		{
 			_collectors = collectors;

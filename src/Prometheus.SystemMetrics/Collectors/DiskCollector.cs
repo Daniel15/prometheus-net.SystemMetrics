@@ -17,6 +17,9 @@ namespace Prometheus.SystemMetrics.Collectors
 
 		internal Gauge DiskSpace { get; private set; } = default!;
 
+		/// <summary>
+		/// Creates a new <see cref="DiskCollector"/>.
+		/// </summary>
 		public DiskCollector(IOptions<DiskCollectorConfig> config, ILogger<DiskCollector> logger)
 		{
 			_logger = logger;

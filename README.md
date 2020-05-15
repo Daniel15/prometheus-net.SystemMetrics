@@ -9,6 +9,8 @@ Install the `prometheus-net.SystemMetrics` library using NuGet.
 Add the services to your `Startup.cs`:
 
 ```csharp
+using Prometheus.SystemMetrics;
+
 public void ConfigureServices(IServiceCollection services)
 {
     // ...

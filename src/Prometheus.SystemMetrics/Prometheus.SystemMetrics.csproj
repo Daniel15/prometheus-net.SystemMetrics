@@ -4,6 +4,20 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>8</LangVersion>
+    <PackageId>prometheus-net.SystemMetrics</PackageId>
+    <Product>prometheus-net.SystemMetrics</Product>
+    <Authors>Daniel Lo Nigro</Authors>
+    <Description>Export system metrics (CPU usage, disk usage, etc) to Prometheus from your .NET app.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Daniel15/prometheus-net.SystemMetrics</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Daniel15/prometheus-net.SystemMetrics</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageIcon>prometheus-net-logo.png</PackageIcon>
+    <PackageTags>prometheus prometheus-net systemmetrics cpu system metrics disk network</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +26,13 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.4" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
     <PackageReference Include="prometheus-net" Version="3.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\prometheus-net-logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
