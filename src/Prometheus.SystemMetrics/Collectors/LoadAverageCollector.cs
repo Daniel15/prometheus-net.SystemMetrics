@@ -22,9 +22,9 @@ namespace Prometheus.SystemMetrics.Collectors
 		/// <param name="factory">Factory to create metric using</param>
 		public void CreateMetrics(MetricFactory factory)
 		{
-			Load1 = Metrics.CreateGauge("node_load1", "Load average over the last minute.");
-			Load5 = Metrics.CreateGauge("node_load5", "Load average over the last 5 minutes.");
-			Load15 = Metrics.CreateGauge("node_load15", "Load average over the last 15 minutes.");
+			Load1 = factory.CreateGauge("node_load1", "Load average over the last minute.");
+			Load5 = factory.CreateGauge("node_load5", "Load average over the last 5 minutes.");
+			Load15 = factory.CreateGauge("node_load15", "Load average over the last 15 minutes.");
 		}
 
 		/// <summary>
