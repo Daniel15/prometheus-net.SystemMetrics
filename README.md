@@ -1,6 +1,9 @@
 # prometheus-net SystemMetrics
 
-prometheus-net SystemMetrics allows you to export various system metrics (such as CPU usage, disk usage, etc) from your .NET application. It is designed to be a very lightweight alternative to `node_exporter`, only containing essential metrics. This is useful on systems with limited RAM or where it is easier to add this library to your app instead of deploying a totally separate service.
+[![NuGet version](http://img.shields.io/nuget/v/prometheus-net.SystemMetrics.svg)](https://www.nuget.org/packages/prometheus-net.SystemMetrics/)&nbsp;
+![Build Status](https://img.shields.io/github/workflow/status/Daniel15/prometheus-net.SystemMetrics/Build)
+
+prometheus-net SystemMetrics allows you to export various system metrics (such as CPU usage, disk usage, etc) from your .NET application to Prometheus. It is designed to be a very lightweight alternative to `node_exporter`, only containing essential metrics. This is useful on systems with limited RAM or where it is easier to add this library to your app instead of deploying a totally separate service.
 
 # Usage
 
@@ -55,7 +58,7 @@ The amount of free disk space on all mounts. Available on **all platforms**. Exa
 
 ```
 # Linux
-node_filesystem_avail_bytes{mountpoint="/",fstype="overlay"} 57061916672
+node_filesystem_avail_bytes{mountpoint="/",fstype="ext4"} 57061916672
 
 # Windows
 node_filesystem_avail_bytes{mountpoint="C:\\",fstype="NTFS"} 101531594752
