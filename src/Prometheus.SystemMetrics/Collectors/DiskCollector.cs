@@ -16,6 +16,7 @@ namespace Prometheus.SystemMetrics.Collectors
 		private readonly HashSet<DriveType> _driveTypes;
 
 		internal Gauge DiskSpace { get; private set; } = default!;
+		internal Gauge Size { get; private set; } = default!;
 
 		/// <summary>
 		/// Creates a new <see cref="DiskCollector"/>.
@@ -43,6 +44,13 @@ namespace Prometheus.SystemMetrics.Collectors
 				"mountpoint",
 				"fstype"
 			);
+
+			Size = factory.CreateGauge(
+				"node_filesystem_size_bytes",
+				"Filesystem size in bytes",
+				"mountpoint",
+				"fstype"
+			);
 		}
 
 		/// <summary>
@@ -55,6 +63,7 @@ namespace Prometheus.SystemMetrics.Collectors
 				try
 				{
 					DiskSpace.WithLabels(drive.Name, drive.DriveFormat).Set(drive.AvailableFreeSpace);
+					Size.WithLabels(drive.Name, drive.DriveFormat).Set(drive.TotalSize);
 				}
 				catch (Exception ex)
 				{
