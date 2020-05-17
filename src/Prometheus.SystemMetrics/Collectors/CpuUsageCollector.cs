@@ -45,11 +45,9 @@ namespace Prometheus.SystemMetrics.Collectors
 		public void UpdateMetrics()
 		{
 			var usage = ProcStatParser.ParseCpuUsage(File.ReadAllText(STAT_FILE), _clockTicksPerSecond);
-			foreach (var kvp in usage)
+			foreach (var data in usage)
 			{
-				var cpuIndex = kvp.Key;
-				var data = kvp.Value;
-
+				var cpuIndex = data.CpuIndex.ToString();
 				Cpu.WithLabels(cpuIndex, "idle").IncTo(data.Idle);
 				Cpu.WithLabels(cpuIndex, "iowait").IncTo(data.IoWait);
 				Cpu.WithLabels(cpuIndex, "irq").IncTo(data.Irq);
