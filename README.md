@@ -38,6 +38,15 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 
 After doing this, going to `/metrics` should return the new metrics.
 
+## Customization
+
+By default, this will add all the collectors. To only add some collectors, you can instead only render the collectors you want to use:
+
+```csharp
+services.AddSystemMetrics(registerDefaultCollectors: false);
+services.AddSystemMetricCollector<CpuUsageCollector>();
+```
+
 # Metrics
 
 Where possible, metrics have the same name and format as `node_exporter`.
@@ -72,6 +81,17 @@ Available on **Linux**. Example data:
 node_load1 0.06
 node_load5 0.03
 node_load15 0.26
+```
+
+# Memory
+
+Stats such as available RAM, RAM used by caches, etc. Available on **Linux**. Example data:
+
+```
+node_memory_MemAvailable_bytes 1527701504
+node_memory_Cached_bytes 572964864
+node_memory_MemFree_bytes 961966080
+node_memory_MemTotal_bytes 2085904384
 ```
 
 ## Network

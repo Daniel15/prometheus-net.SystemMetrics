@@ -21,6 +21,7 @@ namespace Prometheus.SystemMetrics
 				services.AddSystemMetricCollector<CpuUsageCollector>();
 				services.AddSystemMetricCollector<DiskCollector>();
 				services.AddSystemMetricCollector<LoadAverageCollector>();
+				services.AddSystemMetricCollector<MemoryCollector>();
 				services.AddSystemMetricCollector<NetworkCollector>();
 			}
 
