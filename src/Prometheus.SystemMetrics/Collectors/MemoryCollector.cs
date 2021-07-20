@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using Prometheus.SystemMetrics.Background.Interfaces;
+using Prometheus.SystemMetrics.Helper;
 using Prometheus.SystemMetrics.Parsers;
 
 namespace Prometheus.SystemMetrics.Collectors
@@ -10,15 +14,22 @@ namespace Prometheus.SystemMetrics.Collectors
 	/// </summary>
 	public class MemoryCollector : ISystemMetricCollector
 	{
+		private readonly ICpuService _cpuService;
+
+		public MemoryCollector(ICpuService cpuService)
+		{
+			_cpuService = cpuService;
+		}
+
 		/// <summary>
 		/// Gets whether this metric is supported on the current system.
 		/// </summary>
-		public bool IsSupported => true;
+		public bool IsSupported => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || File.Exists(MemInfoParser.MEMINFO_FILE);
 
 		/// <summary>
 		/// Metrics for memory collection.
 		/// </summary>
-		internal IReadOnlyDictionary<string, Gauge> _metrics = new Dictionary<string, Gauge>();
+		internal IReadOnlyDictionary<string, Gauge> Metrics = new Dictionary<string, Gauge>();
 
 		/// <summary>
 		/// Creates the Prometheus metric.
@@ -26,39 +37,13 @@ namespace Prometheus.SystemMetrics.Collectors
 		/// <param name="factory">Factory to create metric using</param>
 		public void CreateMetrics(MetricFactory factory)
 		{
-			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-				CreateMetricsLinux(factory);
-			else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-				CreateMetricsWindows(factory);
-		}
-
-		private void CreateMetricsLinux(MetricFactory factory)
-		{
 			var metrics = new Dictionary<string, Gauge>();
-			foreach (var (name, _) in MemInfoParser.Parse())
+			foreach (var label in MemInfoHelper.Labels)
 			{
-				var cleanName = name.Replace('(', '_').Replace(")", "");
-				cleanName = $"node_memory_{cleanName}_bytes";
-				metrics[name] = factory.CreateGauge(cleanName, $"Memory information field {name}");
+				var cleanName = $"node_memory_{label.Value}_bytes";
+				metrics[label.Key] = factory.CreateGauge(cleanName, $"Memory information field {label.Value}");
 			}
-			_metrics = metrics;
-		}
-
-		private void CreateMetricsWindows(MetricFactory factory)
-		{
-			var metrics = new Dictionary<string, Gauge>();
-
-			metrics[nameof(MEMORYSTATUSEX.dwLength)] = factory.CreateGauge($"node_memory_{nameof(MEMORYSTATUSEX.dwLength)}_bytes", $"Memory information field {nameof(MEMORYSTATUSEX.dwLength)}");
-			metrics[nameof(MEMORYSTATUSEX.dwMemoryLoad)] = factory.CreateGauge($"node_memory_{nameof(MEMORYSTATUSEX.dwMemoryLoad)}_bytes", $"Memory information field {nameof(MEMORYSTATUSEX.dwMemoryLoad)}");
-			metrics[nameof(MEMORYSTATUSEX.ullAvailExtendedVirtual)] = factory.CreateGauge($"node_memory_{nameof(MEMORYSTATUSEX.ullAvailExtendedVirtual)}_bytes", $"Memory information field {nameof(MEMORYSTATUSEX.ullAvailExtendedVirtual)}");
-			metrics[nameof(MEMORYSTATUSEX.ullAvailPageFile)] = factory.CreateGauge($"node_memory_{nameof(MEMORYSTATUSEX.ullAvailPageFile)}_bytes", $"Memory information field {nameof(MEMORYSTATUSEX.ullAvailPageFile)}");
-			metrics[nameof(MEMORYSTATUSEX.ullAvailPhys)] = factory.CreateGauge($"node_memory_{nameof(MEMORYSTATUSEX.ullAvailPhys)}_bytes", $"Memory information field {nameof(MEMORYSTATUSEX.ullAvailPhys)}");
-			metrics[nameof(MEMORYSTATUSEX.ullAvailVirtual)] = factory.CreateGauge($"node_memory_{nameof(MEMORYSTATUSEX.ullAvailVirtual)}_bytes", $"Memory information field {nameof(MEMORYSTATUSEX.ullAvailVirtual)}");
-			metrics[nameof(MEMORYSTATUSEX.ullTotalPageFile)] = factory.CreateGauge($"node_memory_{nameof(MEMORYSTATUSEX.ullTotalPageFile)}_bytes", $"Memory information field {nameof(MEMORYSTATUSEX.ullTotalPageFile)}");
-			metrics[nameof(MEMORYSTATUSEX.ullTotalPhys)] = factory.CreateGauge($"node_memory_{nameof(MEMORYSTATUSEX.ullTotalPhys)}_bytes", $"Memory information field {nameof(MEMORYSTATUSEX.ullTotalPhys)}");
-			metrics[nameof(MEMORYSTATUSEX.ullTotalVirtual)] = factory.CreateGauge($"node_memory_{nameof(MEMORYSTATUSEX.ullTotalVirtual)}_bytes", $"Memory information field {nameof(MEMORYSTATUSEX.ullTotalVirtual)}");
-
-			_metrics = metrics;
+			Metrics = metrics;
 		}
 
 		/// <summary>
@@ -70,13 +55,16 @@ namespace Prometheus.SystemMetrics.Collectors
 				UpdateMetricsLinux();
 			else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 				UpdateMetricsWindows();
+
+			var proc = Process.GetCurrentProcess();
+			Metrics["MEMUSEDCOMPONENT"]?.Set(_cpuService.GetMemory(proc.Id));
 		}
 
 		private void UpdateMetricsLinux()
 		{
 			foreach (var (name, value) in MemInfoParser.Parse())
 			{
-				if (_metrics.TryGetValue(name, out var gauge))
+				if (Metrics.TryGetValue(name.ToUpper(), out var gauge))
 				{
 					gauge.Set(value);
 				}
@@ -90,15 +78,14 @@ namespace Prometheus.SystemMetrics.Collectors
 			if (!WindowsNative.GlobalMemoryStatusEx(memStatus))
 				throw new Exception(Marshal.GetLastWin32Error().ToString());
 
-			_metrics[nameof(memStatus.dwLength)]?.Set(memStatus.dwLength);
-			_metrics[nameof(memStatus.dwMemoryLoad)]?.Set(memStatus.dwMemoryLoad);
-			_metrics[nameof(memStatus.ullAvailExtendedVirtual)]?.Set(memStatus.ullAvailExtendedVirtual);
-			_metrics[nameof(memStatus.ullAvailPageFile)]?.Set(memStatus.ullAvailPageFile);
-			_metrics[nameof(memStatus.ullAvailPhys)]?.Set(memStatus.ullAvailPhys);
-			_metrics[nameof(memStatus.ullAvailVirtual)]?.Set(memStatus.ullAvailVirtual);
-			_metrics[nameof(memStatus.ullTotalPageFile)]?.Set(memStatus.ullTotalPageFile);
-			_metrics[nameof(memStatus.ullTotalPhys)]?.Set(memStatus.ullTotalPhys);
-			_metrics[nameof(memStatus.ullTotalVirtual)]?.Set(memStatus.ullTotalVirtual);
+			Metrics[nameof(memStatus.dwMemoryLoad).ToUpper()]?.Set(memStatus.dwMemoryLoad);
+			Metrics[nameof(memStatus.ullAvailExtendedVirtual).ToUpper()]?.Set(memStatus.ullAvailExtendedVirtual);
+			Metrics[nameof(memStatus.ullAvailPageFile).ToUpper()]?.Set(memStatus.ullAvailPageFile);
+			Metrics[nameof(memStatus.ullAvailPhys).ToUpper()]?.Set(memStatus.ullAvailPhys);
+			Metrics[nameof(memStatus.ullAvailVirtual).ToUpper()]?.Set(memStatus.ullAvailVirtual);
+			Metrics[nameof(memStatus.ullTotalPageFile).ToUpper()]?.Set(memStatus.ullTotalPageFile);
+			Metrics[nameof(memStatus.ullTotalPhys).ToUpper()]?.Set(memStatus.ullTotalPhys);
+			Metrics[nameof(memStatus.ullTotalVirtual).ToUpper()]?.Set(memStatus.ullTotalVirtual);
 		}
 	}
 }
