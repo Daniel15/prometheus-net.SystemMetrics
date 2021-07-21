@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Mono.Unix.Native;
-using Prometheus.SystemMetrics.Background.Interfaces;
 using Prometheus.SystemMetrics.Helper;
 using Prometheus.SystemMetrics.Parsers;
 
@@ -15,13 +14,6 @@ namespace Prometheus.SystemMetrics.Collectors
 	/// </summary>
 	public class CpuUsageCollector : ISystemMetricCollector
 	{
-		private readonly ICpuService _cpuService;
-
-		public CpuUsageCollector(ICpuService cpuService)
-		{
-			_cpuService = cpuService;
-		}
-
 		/// <summary>
 		/// File to read stats from
 		/// </summary>

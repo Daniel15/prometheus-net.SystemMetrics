@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Prometheus.SystemMetrics.Background;
-using Prometheus.SystemMetrics.Background.Interfaces;
 using Prometheus.SystemMetrics.Collectors;
 
 namespace Prometheus.SystemMetrics
@@ -17,11 +15,6 @@ namespace Prometheus.SystemMetrics
 		{
 			services.AddHostedService<SystemMetricsHostedService>();
 			services.AddOptions<DiskCollectorConfig>();
-
-			services.AddSingleton<CpuService>();
-			services.AddSingleton<ICpuManager, CpuService>();
-			services.AddSingleton<ICpuService, CpuService>();
-			services.AddHostedService<CpuBackground>();
 
 			if (registerDefaultCollectors)
 			{

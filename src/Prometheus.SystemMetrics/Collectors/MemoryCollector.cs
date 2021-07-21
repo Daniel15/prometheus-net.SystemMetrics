@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using Prometheus.SystemMetrics.Background.Interfaces;
 using Prometheus.SystemMetrics.Helper;
+using Prometheus.SystemMetrics.Native;
 using Prometheus.SystemMetrics.Parsers;
 
 namespace Prometheus.SystemMetrics.Collectors
@@ -14,13 +13,6 @@ namespace Prometheus.SystemMetrics.Collectors
 	/// </summary>
 	public class MemoryCollector : ISystemMetricCollector
 	{
-		private readonly ICpuService _cpuService;
-
-		public MemoryCollector(ICpuService cpuService)
-		{
-			_cpuService = cpuService;
-		}
-
 		/// <summary>
 		/// Gets whether this metric is supported on the current system.
 		/// </summary>
@@ -55,9 +47,6 @@ namespace Prometheus.SystemMetrics.Collectors
 				UpdateMetricsLinux();
 			else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 				UpdateMetricsWindows();
-
-			var proc = Process.GetCurrentProcess();
-			Metrics["MEMUSEDCOMPONENT"]?.Set(_cpuService.GetMemory(proc.Id));
 		}
 
 		private void UpdateMetricsLinux()

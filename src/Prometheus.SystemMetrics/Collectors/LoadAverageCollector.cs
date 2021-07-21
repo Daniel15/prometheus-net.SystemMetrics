@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Prometheus.SystemMetrics.Native;
 
 namespace Prometheus.SystemMetrics.Collectors
 {

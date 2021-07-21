@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Prometheus.SystemMetrics
+namespace Prometheus.SystemMetrics.Native
 {
 	/// <summary>
 	/// Native API calls for Linux.
