@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Prometheus.SystemMetrics.Collectors
@@ -25,12 +26,14 @@ namespace Prometheus.SystemMetrics.Collectors
 
 		private static readonly Dictionary<string, string> _labels = new()
 		{
-			{ "% Processor Time", "system" },
-			{ "Interrupts/sec", "irq" },
-			{ "% Interrupt Time", "iowait" },
+			{ "% Privileged Time", "system" },
+			{ "% Interrupt Time", "irq" },
 			{ "% Idle Time", "idle" },
 			{ "% User Time", "user" }
 		};
+
+		private const int NS_IN_SEC = 1000000000;
+		private const int COUNTER_100NS_IN_SEC = NS_IN_SEC / 100;
 
 		/// <summary>
 		/// Creates the Prometheus metric.
@@ -43,11 +46,19 @@ namespace Prometheus.SystemMetrics.Collectors
 			for (var i = 0; i < Environment.ProcessorCount; i++)
 			{
 				var instanceName = $"{i}";
-				_counters.Add(new PerformanceCounter("Processor", "% Processor Time", instanceName)); //system
-				_counters.Add(new PerformanceCounter("Processor", "Interrupts/sec", instanceName)); //irq
+				// These are all Timer100Ns type
+				_counters.Add(new PerformanceCounter("Processor", "% Privileged Time", instanceName)); //system
 				_counters.Add(new PerformanceCounter("Processor", "% Interrupt Time", instanceName)); //iowait
 				_counters.Add(new PerformanceCounter("Processor", "% Idle Time", instanceName)); //idle
 				_counters.Add(new PerformanceCounter("Processor", "% User Time", instanceName)); //user
+			}
+
+			var hasUnexpectedType = _counters.Any(x => x.CounterType != PerformanceCounterType.Timer100Ns);
+			if (hasUnexpectedType)
+			{
+				throw new Exception(
+					"A CPU counter was not of type Timer100Ns. Please report a bug to the prometheus-net.SystemMetrics project"
+				);
 			}
 
 			Cpu = factory.CreateCounter(
@@ -65,10 +76,13 @@ namespace Prometheus.SystemMetrics.Collectors
 		{
 			foreach (var performanceCounter in _counters)
 			{
+				// Assumes all counters are Timer100Ns type
+				var value = (float)performanceCounter.RawValue / COUNTER_100NS_IN_SEC;
+
 				Cpu.WithLabels(
 					performanceCounter.InstanceName,
 					_labels[performanceCounter.CounterName]
-				).IncTo(performanceCounter.NextValue());
+				).IncTo(value);
 			}
 		}
 	}
