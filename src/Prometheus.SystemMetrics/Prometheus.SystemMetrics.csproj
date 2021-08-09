@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <LangVersion>8</LangVersion>
+    <LangVersion>latestMajor</LangVersion>
     <PackageId>prometheus-net.SystemMetrics</PackageId>
     <Product>prometheus-net.SystemMetrics</Product>
     <Authors>Daniel Lo Nigro</Authors>

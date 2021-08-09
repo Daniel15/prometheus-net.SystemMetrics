@@ -18,11 +18,15 @@ namespace Prometheus.SystemMetrics
 
 			if (registerDefaultCollectors)
 			{
-				services.AddSystemMetricCollector<CpuUsageCollector>();
 				services.AddSystemMetricCollector<DiskCollector>();
 				services.AddSystemMetricCollector<LoadAverageCollector>();
-				services.AddSystemMetricCollector<MemoryCollector>();
 				services.AddSystemMetricCollector<NetworkCollector>();
+
+				services.AddSystemMetricCollector<LinuxCpuUsageCollector>();
+				services.AddSystemMetricCollector<LinuxMemoryCollector>();
+
+				services.AddSystemMetricCollector<WindowsCpuUsageCollector>();
+				services.AddSystemMetricCollector<WindowsMemoryCollector>();
 			}
 
 			return services;
