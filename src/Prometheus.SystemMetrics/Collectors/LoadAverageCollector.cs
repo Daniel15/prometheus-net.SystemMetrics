@@ -15,7 +15,11 @@ namespace Prometheus.SystemMetrics.Collectors
 		/// <summary>
 		/// Gets whether this metric is supported on the current system.
 		/// </summary>
+#if NETFRAMEWORK
+		public bool IsSupported => false;
+#else
 		public bool IsSupported => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+#endif
 
 		/// <summary>
 		/// Creates the Prometheus metric.

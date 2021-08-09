@@ -14,7 +14,9 @@ namespace Prometheus.SystemMetrics.Collectors
 		/// </summary>
 		protected override ISystemMetricCollector[] Collectors => new ISystemMetricCollector[]
 		{
+#if !NETFRAMEWORK
 			new LinuxCpuUsageCollector(),
+#endif
 			new WindowsCpuUsageCollector(),
 		};
 	}

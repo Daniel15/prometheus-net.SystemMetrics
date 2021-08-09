@@ -12,7 +12,11 @@ namespace Prometheus.SystemMetrics.Collectors
 		/// <summary>
 		/// Gets whether this metric is supported on the current system.
 		/// </summary>
+#if NETFRAMEWORK
+		public bool IsSupported => true;
+#else
 		public bool IsSupported => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#endif
 
 		internal Gauge MemoryLoad { get; private set; } = default!;
 		internal Gauge PageFileAvailable { get; private set; } = default!;

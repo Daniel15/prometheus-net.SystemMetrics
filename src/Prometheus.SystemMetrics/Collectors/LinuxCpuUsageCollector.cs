@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#if !NETFRAMEWORK
+using System.IO;
 using Mono.Unix.Native;
 using Prometheus.SystemMetrics.Parsers;
 
@@ -60,3 +61,4 @@ namespace Prometheus.SystemMetrics.Collectors
 		}
 	}
 }
+#endif

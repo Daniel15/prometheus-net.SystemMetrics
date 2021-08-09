@@ -22,7 +22,9 @@ namespace Prometheus.SystemMetrics
 				services.AddSystemMetricCollector<LoadAverageCollector>();
 				services.AddSystemMetricCollector<NetworkCollector>();
 
+#if !NETFRAMEWORK
 				services.AddSystemMetricCollector<LinuxCpuUsageCollector>();
+#endif
 				services.AddSystemMetricCollector<LinuxMemoryCollector>();
 
 				services.AddSystemMetricCollector<WindowsCpuUsageCollector>();

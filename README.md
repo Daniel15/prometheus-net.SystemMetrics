@@ -108,6 +108,7 @@ node_network_receive_bytes_total{device="eth0"} 5822231
 ## 2.0.0 - 8th October 2021
 
 * Added memory and CPU collectors for Windows (thanks to @masterworgen for the initial implementation in PR #3)
+* Added .NET Framework 4.6.2 builds, since prometheus-net itself supports this framework version.
 
 ## 1.0.1 - 17th May 2020
 
