@@ -53,7 +53,7 @@ Where possible, metrics have the same name and format as `node_exporter`.
 
 ## CPU
 
-The number of seconds the CPU has spent in each mode (system, user, idle, etc). Available on **Linux**. Example data:
+The number of seconds the CPU has spent in each mode (system, user, idle, etc). Available on **Linux** and **Windows**. Example data:
 
 ```
 node_cpu_seconds_total{cpu="0",mode="system"} 172.35
@@ -83,9 +83,9 @@ node_load5 0.03
 node_load15 0.26
 ```
 
-# Memory
+## Memory
 
-Stats such as available RAM, RAM used by caches, etc. Available on **Linux**. Example data:
+Stats such as available RAM, RAM used by caches, etc. Available on **Linux** and **Windows**. Example data:
 
 ```
 node_memory_MemAvailable_bytes 1527701504
@@ -102,3 +102,14 @@ Total amount of data sent and received over the network. Available on **all plat
 node_network_transmit_bytes_total{device="eth0"} 3053723
 node_network_receive_bytes_total{device="eth0"} 5822231
 ```
+
+# Changelog
+
+## 2.0.0 - 8th October 2021
+
+* Added memory and CPU collectors for Windows (thanks to @masterworgen for the initial implementation in PR #3)
+
+## 1.0.1 - 17th May 2020
+
+* Added memory stats for Linux
+* Added total file size to disk collector
