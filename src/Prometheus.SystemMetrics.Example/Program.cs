@@ -1,20 +1,25 @@
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
+using Prometheus;
+using Prometheus.SystemMetrics;
 
-namespace Prometheus.SystemMetrics.Example
+var builder = WebApplication.CreateSlimBuilder(args);
+
+var services = builder.Services;
+services.AddSystemMetrics();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			CreateHostBuilder(args).Build().Run();
-		}
-
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStartup<Startup>();
-				});
-	}
+	app.UseDeveloperExceptionPage();
 }
+
+app.UseRouting();
+app.MapMetrics();
+app.MapGet("/", async context =>
+{
+	context.Response.Redirect("/metrics");
+});
+
+app.Run();
