@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Prometheus.SystemMetrics.Collectors;
 
 namespace Prometheus.SystemMetrics
@@ -13,13 +15,18 @@ namespace Prometheus.SystemMetrics
 	public class SystemMetricsHostedService : IHostedService
 	{
 		private readonly IEnumerable<ISystemMetricCollector> _collectors;
+		private readonly ILogger<SystemMetricsHostedService> _logger;
 
 		/// <summary>
 		/// Creates a new <see cref="SystemMetricsHostedService"/>
 		/// </summary>
-		public SystemMetricsHostedService(IEnumerable<ISystemMetricCollector> collectors)
+		public SystemMetricsHostedService(
+			IEnumerable<ISystemMetricCollector> collectors,
+			ILogger<SystemMetricsHostedService> logger
+		)
 		{
 			_collectors = collectors;
+			_logger = logger;
 		}
 		/// <summary>
 		/// Triggered when the application host is ready to start the service.
@@ -32,8 +39,15 @@ namespace Prometheus.SystemMetrics
 			var factory = Metrics.WithCustomRegistry(registry);
 			foreach (var collector in _collectors.Where(collector => collector.IsSupported))
 			{
-				collector.CreateMetrics(factory);
-				registry.AddBeforeCollectCallback(collector.UpdateMetrics);
+				try
+				{
+					collector.CreateMetrics(factory);
+					registry.AddBeforeCollectCallback(collector.UpdateMetrics);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, $"Could not initialize {collector.GetType().Name}. Some metrics will be missing.");
+				}
 			}
 
 			return Task.CompletedTask;
