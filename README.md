@@ -105,12 +105,19 @@ node_network_receive_bytes_total{device="eth0"} 5822231
 
 # Changelog
 
+## 3.0.0 - 30th November 2023
+
+* Bumped to .NET 8.0.
+* Bumped prometheus-net dependency to version 8.
+* Wrapped metric collector creation in try-catch so that one collector failing doesn't break the whole app.
+* Updated Windows memory counters so their names more closely match the Linux version. Notably, `node_memory_MemFree` is now `node_memory_MemAvailable_bytes`, and `node_memory_MemTotal` is now `node_memory_MemTotal_bytes`. Currently, both the old and new counters exist (for backwards compatibility), but the old ones will be removed in the next major version.
+
 ## 2.0.0 - 8th October 2021
 
-* Added memory and CPU collectors for Windows (thanks to @masterworgen for the initial implementation in PR #3)
+* Added memory and CPU collectors for Windows (thanks to @masterworgen for the initial implementation in PR #3).
 * Added .NET Framework 4.6.2 builds, since prometheus-net itself supports this framework version.
 
 ## 1.0.1 - 17th May 2020
 
-* Added memory stats for Linux
-* Added total file size to disk collector
+* Added memory stats for Linux.
+* Added total file size to disk collector.
