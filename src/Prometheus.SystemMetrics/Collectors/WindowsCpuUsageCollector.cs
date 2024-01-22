@@ -41,6 +41,11 @@ namespace Prometheus.SystemMetrics.Collectors
 		/// <param name="factory">Factory to create metric using</param>
 		public void CreateMetrics(MetricFactory factory)
 		{
+			if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+			{
+				return;
+			}
+
 			_counters = new List<PerformanceCounter>();
 
 			for (var i = 0; i < Environment.ProcessorCount; i++)
@@ -74,6 +79,11 @@ namespace Prometheus.SystemMetrics.Collectors
 		/// </summary>
 		public void UpdateMetrics()
 		{
+			if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+			{
+				return;
+			}
+
 			foreach (var performanceCounter in _counters)
 			{
 				// Assumes all counters are Timer100Ns type
