@@ -31,10 +31,6 @@
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'netcoreapp2.1' Or '$(TargetFramework)' == 'net80'">
-    <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
-  </ItemGroup>
-
   <ItemGroup>
     <None Include="..\..\prometheus-net-logo.png">
       <Pack>True</Pack>

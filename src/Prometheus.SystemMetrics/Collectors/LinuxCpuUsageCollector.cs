@@ -1,6 +1,6 @@
 ﻿#if !NETFRAMEWORK
 using System.IO;
-using Mono.Unix.Native;
+using Prometheus.SystemMetrics.Native;
 using Prometheus.SystemMetrics.Parsers;
 
 namespace Prometheus.SystemMetrics.Collectors
@@ -37,7 +37,7 @@ namespace Prometheus.SystemMetrics.Collectors
 				"mode"
 			);
 
-			_clockTicksPerSecond = (int)Syscall.sysconf(SysconfName._SC_CLK_TCK);
+			_clockTicksPerSecond = (int)LinuxNative.sysconf(LinuxNative.SC_CLK_TCK);
 		}
 
 		/// <summary>
