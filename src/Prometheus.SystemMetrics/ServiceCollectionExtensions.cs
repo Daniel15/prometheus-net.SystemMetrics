@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 using Prometheus.SystemMetrics.Collectors;
 
 namespace Prometheus.SystemMetrics
@@ -38,7 +39,11 @@ namespace Prometheus.SystemMetrics
 		/// Adds a system metric collector to the <see cref="IServiceCollection"/>
 		/// </summary>
 		/// <typeparam name="T">Metric to add</typeparam>
+#if NET7_0_OR_GREATER
+		public static IServiceCollection AddSystemMetricCollector<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(this IServiceCollection services)
+#else
 		public static IServiceCollection AddSystemMetricCollector<T>(this IServiceCollection services)
+#endif
 			where T : class, ISystemMetricCollector
 		{
 			services.AddSingleton<ISystemMetricCollector, T>();
