@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <LangVersion>latestMajor</LangVersion>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <!-- Required by LibraryImport -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>prometheus-net.SystemMetrics</PackageId>
     <Product>prometheus-net.SystemMetrics</Product>
     <Authors>Daniel Lo Nigro</Authors>

@@ -5,15 +5,27 @@ namespace Prometheus.SystemMetrics.Native
 	/// <summary>
 	/// Native API calls for Windows.
 	/// </summary>
-	internal static class WindowsNative
+	internal static partial class WindowsNative
 	{
+#if NET7_0_OR_GREATER
+		/// <summary>
+		/// Retrieves information about the system's current usage of both physical and virtual memory.
+		/// See https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-globalmemorystatusex
+		/// </summary>
+		[return: MarshalAs(UnmanagedType.Bool)]
+		[LibraryImport("kernel32.dll", SetLastError = true)]
+		[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+		internal static partial bool GlobalMemoryStatusEx(ref MemoryStatusEx lpBuffer);
+#else
 		/// <summary>
 		/// Retrieves information about the system's current usage of both physical and virtual memory.
 		/// See https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-globalmemorystatusex
 		/// </summary>
 		[return: MarshalAs(UnmanagedType.Bool)]
 		[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-		internal static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
+		[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+		internal static extern bool GlobalMemoryStatusEx(ref MemoryStatusEx lpBuffer);
+#endif
 	}
 
 	/// <summary>
@@ -21,7 +33,7 @@ namespace Prometheus.SystemMetrics.Native
 	/// See https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/ns-sysinfoapi-memorystatusex
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-	public class MEMORYSTATUSEX
+	internal struct MemoryStatusEx
 	{
 		/// <summary>
 		/// The size of the structure, in bytes. You must set this member before calling 
@@ -83,11 +95,11 @@ namespace Prometheus.SystemMetrics.Native
 		public ulong ullAvailExtendedVirtual;
 
 		/// <summary>
-		/// Creates a new instance of <see cref="MEMORYSTATUSEX"/>.
+		/// Creates a new instance of <see cref="MemoryStatusEx"/>.
 		/// </summary>
-		public MEMORYSTATUSEX()
+		public MemoryStatusEx()
 		{
-			dwLength = (uint)Marshal.SizeOf<MEMORYSTATUSEX>();
+			dwLength = (uint)Marshal.SizeOf<MemoryStatusEx>();
 		}
 	}
 }

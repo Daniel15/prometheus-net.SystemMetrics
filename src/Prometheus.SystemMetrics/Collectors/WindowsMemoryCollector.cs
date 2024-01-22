@@ -105,9 +105,9 @@ namespace Prometheus.SystemMetrics.Collectors
 		/// </summary>
 		public void UpdateMetrics()
 		{
-			var memStatus = new MEMORYSTATUSEX();
+			var memStatus = new MemoryStatusEx();
 
-			if (!WindowsNative.GlobalMemoryStatusEx(memStatus))
+			if (!WindowsNative.GlobalMemoryStatusEx(ref memStatus))
 			{
 				throw new Exception(Marshal.GetLastWin32Error().ToString());
 			}
