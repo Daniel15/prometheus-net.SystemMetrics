@@ -21,7 +21,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageIcon>prometheus-net-logo.png</PackageIcon>
     <PackageTags>prometheus prometheus-net systemmetrics cpu system metrics disk network</PackageTags>
-    <Version>3.0.0</Version>
+    <Version>3.1.0</Version>
   </PropertyGroup>
 
 	<ItemGroup>

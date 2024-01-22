@@ -105,6 +105,11 @@ node_network_receive_bytes_total{device="eth0"} 5822231
 
 # Changelog
 
+## 3.1.0 - 21st January 2024
+
+* Added support for [Native AoT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)
+* Removed `Mono.Posix` dependency to enable support for architectures other than x86-64. Note that platforms like ARM64 have not been tested yet - feedback would be appreciated.
+
 ## 3.0.0 - 30th November 2023
 
 * Bumped to .NET 8.0.
