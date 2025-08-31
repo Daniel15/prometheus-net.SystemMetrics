@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Prometheus.SystemMetrics.Collectors
@@ -13,7 +12,9 @@ namespace Prometheus.SystemMetrics.Collectors
 	{
 		internal Counter Cpu { get; private set; } = default!;
 
-		private IList<PerformanceCounter> _counters = new List<PerformanceCounter>();
+		// {counter name => {cpu index => counter}
+		private IDictionary<string, PerformanceCounter[]> _counters = 
+			new Dictionary<string, PerformanceCounter[]>();
 
 		/// <summary>
 		/// Gets whether this metric is supported on the current system.
@@ -34,6 +35,11 @@ namespace Prometheus.SystemMetrics.Collectors
 
 		private const int NS_IN_SEC = 1000000000;
 		private const int COUNTER_100NS_IN_SEC = NS_IN_SEC / 100;
+		/// <summary>
+		/// Once a counter reaches this threshold, it's recreated.
+		/// https://github.com/Daniel15/prometheus-net.SystemMetrics/issues/9
+		/// </summary>
+		private const float RECREATE_COUNTER_THRESHOLD = 4000000;
 
 		/// <summary>
 		/// Creates the Prometheus metric.
@@ -46,24 +52,14 @@ namespace Prometheus.SystemMetrics.Collectors
 				return;
 			}
 
-			_counters = new List<PerformanceCounter>();
-
-			for (var i = 0; i < Environment.ProcessorCount; i++)
+			// Create one counter per metric per CPU
+			foreach (var kvp in _labels)
 			{
-				var instanceName = $"{i}";
-				// These are all Timer100Ns type
-				_counters.Add(new PerformanceCounter("Processor", "% Privileged Time", instanceName)); //system
-				_counters.Add(new PerformanceCounter("Processor", "% Interrupt Time", instanceName)); //iowait
-				_counters.Add(new PerformanceCounter("Processor", "% Idle Time", instanceName)); //idle
-				_counters.Add(new PerformanceCounter("Processor", "% User Time", instanceName)); //user
-			}
-
-			var hasUnexpectedType = _counters.Any(x => x.CounterType != PerformanceCounterType.Timer100Ns);
-			if (hasUnexpectedType)
-			{
-				throw new Exception(
-					"A CPU counter was not of type Timer100Ns. Please report a bug to the prometheus-net.SystemMetrics project"
-				);
+				_counters[kvp.Key] = new PerformanceCounter[Environment.ProcessorCount];
+				for (var i = 0; i < Environment.ProcessorCount; i++)
+				{
+					CreateCounter(kvp.Key, i);
+				}
 			}
 
 			Cpu = factory.CreateCounter(
@@ -72,6 +68,21 @@ namespace Prometheus.SystemMetrics.Collectors
 				"cpu",
 				"mode"
 			);
+		}
+
+		private void CreateCounter(string counterName, int cpuIndex)
+		{
+			var oldCounter = _counters[counterName][cpuIndex];
+			oldCounter?.Dispose();
+
+			var newCounter = new PerformanceCounter("Processor", counterName, cpuIndex.ToString());
+			if (newCounter.CounterType != PerformanceCounterType.Timer100Ns)
+			{
+				throw new Exception(
+					"A CPU counter was not of type Timer100Ns. Please report a bug to the prometheus-net.SystemMetrics project"
+				);
+			}
+			_counters[counterName][cpuIndex] = newCounter;
 		}
 
 		/// <summary>
@@ -83,16 +94,28 @@ namespace Prometheus.SystemMetrics.Collectors
 			{
 				return;
 			}
-
-			foreach (var performanceCounter in _counters)
+			
+			foreach (var kvp in _counters)
 			{
-				// Assumes all counters are Timer100Ns type
-				var value = (float)performanceCounter.RawValue / COUNTER_100NS_IN_SEC;
+				var cpuIndex = 0;
+				foreach (var performanceCounter in kvp.Value)
+				{
+					// Assumes all counters are Timer100Ns type
+					var value = (double)performanceCounter.RawValue / COUNTER_100NS_IN_SEC;
+					Cpu.WithLabels(
+						performanceCounter.InstanceName,
+						_labels[performanceCounter.CounterName]
+					).IncTo(value);
 
-				Cpu.WithLabels(
-					performanceCounter.InstanceName,
-					_labels[performanceCounter.CounterName]
-				).IncTo(value);
+					// If this counter is getting large, recreate it. Prometheus correctly handles
+					// counters rolling over, so this shouldn't cause any issues.
+					// https://github.com/Daniel15/prometheus-net.SystemMetrics/issues/9
+					if (value >= RECREATE_COUNTER_THRESHOLD)
+					{
+						CreateCounter(kvp.Key, cpuIndex);
+					}
+					cpuIndex++;
+				}
 			}
 		}
 	}
